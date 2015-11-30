@@ -119,9 +119,11 @@
         '<span class="irs-bar"></span>';
 
     var single_html =
-        '<span class="irs-bar-edge"></span>' +
         '<span class="irs-shadow shadow-single"></span>' +
         '<span class="irs-slider single"></span>';
+
+    var single_edge =
+        '<span class="irs-bar-edge"></span>';
 
     var double_html =
         '<span class="irs-shadow shadow-from"></span>' +
@@ -310,11 +312,14 @@
             input_values_separator: ";",
 
             disable: false,
+            fixMiddle: false,
 
             onStart: null,
             onChange: null,
             onFinish: null,
             onUpdate: null
+
+
         };
 
 
@@ -369,7 +374,9 @@
 
             input_values_separator: $inp.data("inputValuesSeparator"),
 
-            disable: $inp.data("disable")
+            disable: $inp.data("disable"),
+
+            fixMiddle: $inp.data("fixMiddle")
         };
         config_from_data.values = config_from_data.values && config_from_data.values.split(",");
 
@@ -498,6 +505,11 @@
             this.$cache.grid = this.$cache.cont.find(".irs-grid");
 
             if (this.options.type === "single") {
+
+                if(!this.options.fixMiddle)
+                {
+                    this.$cache.cont.append(single_edge);
+                }
                 this.$cache.cont.append(single_html);
                 this.$cache.edge = this.$cache.cont.find(".irs-bar-edge");
                 this.$cache.s_single = this.$cache.cont.find(".single");
@@ -737,7 +749,7 @@
                 this.is_finish = true;
                 this.callOnFinish();
             }
-            
+
             this.dragging = false;
         },
 
@@ -1084,8 +1096,23 @@
             }
 
             if (this.options.type === "single") {
-                this.coords.p_bar_x = (this.coords.p_handle / 2);
-                this.coords.p_bar_w = this.coords.p_single_fake;
+
+                if (this.options.fixMiddle) {
+
+                    if(this.coords.p_single_fake < 50) {
+
+                        this.coords.p_bar_x = this.coords.p_single_fake + (this.coords.p_handle / 2);
+                    } else {
+                        this.coords.p_bar_x = "50";
+                    }
+
+                    this.coords.p_bar_w = Math.abs(this.coords.p_single_fake + (this.coords.p_handle / 2) - 50);
+                } else {
+                    this.coords.p_bar_x = (this.coords.p_handle / 2);
+                    this.coords.p_bar_w = this.coords.p_single_fake;
+                }
+
+
 
                 this.result.from_percent = this.coords.p_single_real;
                 this.result.from = this.convertToValue(this.coords.p_single_real);
